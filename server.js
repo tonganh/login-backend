@@ -1,18 +1,25 @@
-var express = require('express')
-var mysql = require('mysql')
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password:'lovehangga',
-    database:'login'
-});
-var app=express()
-connection.connect(function (err) {
-    if (!err) {
-        console.log('Database is connected...\n\n'); 
-    } else {
-        console.log('Error connecting database ...\n\n');
-    }
-});
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+// const nodemailer = require('nodemailer');
+const login = require('./routes/loginroutes');
+require('dotenv').config();
 
-app.listen(3000)
+const app = express();
+// const nodemailer = require('nodemailer');
+
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+const router = express.Router();
+// test route
+router.get('/', (req, res) => {
+  res.json({ message: 'welcome to our upload module apis' });
+});
+// route to handle user registration
+router.post('/register', login.register);
+router.post('/login', login.login);
+router.post('/forgot', login.forgot);
+// router.post('/forgot-password',)
+app.use('/api', router);
+app.listen(4000);
