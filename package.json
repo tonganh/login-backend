@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon --inspect server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -18,6 +19,8 @@
     "eslint-config-airbnb": "^18.2.0",
     "experss": "0.0.1-security",
     "express": "^4.17.1",
+    "express-kun": "^1.0.24",
+    "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "nodemailer": "^6.4.14",
