@@ -23,6 +23,10 @@ module.exports = (sequelize, type) => sequelize.define('user', {
   resetPasswordExpires: {
     type: type.DATE,
   },
+  state: {
+    type: type.STRING,
+
+  },
 }, {
   tableName: 'Users',
   timestamps: false,

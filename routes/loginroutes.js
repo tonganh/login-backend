@@ -27,15 +27,15 @@ connection.connect((err) => {
 });
 exports.register = async (req, res) => {
   const { password } = req.body;
-  const encryptedPassword = await bcrypt.hash(password, saltRounds);
+  const encryptedPassword = await bcrypt.hash(password, saltRounds).catch((e) => {
+    throw e;
+  });
   const users = {
     username: req.body.username,
     email: req.body.email,
     password: encryptedPassword,
   };
-  if (req.body.email === '') {
-    res.status(400).send('Email required');
-  }
+
   User.findOne({
     where: {
       email: req.body.email,
@@ -46,11 +46,12 @@ exports.register = async (req, res) => {
         username: users.username,
         email: users.email,
         password: users.password,
+        state: 'Deactive',
       }).then(() => {
         res.status(201).send('Successfull');
       });
     } else {
-      res.status(404).send('Not existed in database');
+      res.status(404).send('Existed in database');
     }
   });
 };
@@ -77,10 +78,13 @@ exports.login = async function (req, res, err) {
       const token = jwt.sign({ user }, 'yourSecretKey', {
         expiresIn: '24h',
       });
+      user.update({
+        state: 'Active',
+      });
       res.json({
         id: user.id,
         token,
-        message: 'Creat user successfully',
+        message: 'Login successfull.',
       });
     } else {
       res.status(404).send('Password is not incorrect.');
@@ -177,16 +181,19 @@ exports.reset = async function (req, res) {
     res.status(400).json('password reset link is invalid or has expired');
   } else if (user != null) {
     console.log('user exists in db');
-    bcrypt.hash(req.body.password, saltRounds).then((hashedPassword) => {
-      user.update({
-        password: hashedPassword,
-        resetPasswordToken: null,
-        resetPasswordExpires: null,
+    bcrypt
+      .hash(req.body.password, saltRounds)
+      .then((hashedPassword) => {
+        user.update({
+          password: hashedPassword,
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        });
+      })
+      .then(() => {
+        console.log('Password updated');
+        res.status(200).json('password updated');
       });
-    }).then(() => {
-      console.log('Password updated');
-      res.status(200).json('password updated');
-    });
   } else {
     console.error('no user exists in db to update');
     res.status(401).json('no user exists in db to update');
