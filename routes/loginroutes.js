@@ -199,3 +199,27 @@ exports.reset = async function (req, res) {
     res.status(401).json('no user exists in db to update');
   }
 };
+exports.update = async function (req, res) {
+  const user = await User.findOne({
+    where: { email: req.body.email },
+  });
+  if (user == null) {
+    res.status(400).json('Login again and update.');
+  } else if (user != null) {
+    bcrypt
+      .hash(req.body.password, saltRounds)
+      .then((hashedPassword) => {
+        user.update({
+          password: hashedPassword,
+        });
+      })
+      .then(() => {
+        res.status(200).json('User updated');
+      });
+  } else {
+    res.status(401).json('no user exists in db to update');
+  }
+};
+// exports.update1 = async (req, res) => {
+
+// };

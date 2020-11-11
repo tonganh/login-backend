@@ -20,7 +20,7 @@ router.post('/reset/:token', login.reset);
 protectRouter.get('/', login.getAll);
 router.post('/login', login.login);
 protectRouter.get('/:id', login.get);
-
+router.post('/update', login.update);
 // router.post('/forgot-password',)
 app.use('/api', router);
 app.listen(4000);
