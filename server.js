@@ -21,6 +21,8 @@ protectRouter.get('/', login.getAll);
 router.post('/login', login.login);
 protectRouter.get('/:id', login.get);
 router.post('/update', login.update);
+router.post('/update1/:id', login.update1);
+router.post('/updateState/:id', login.updateState);
 // router.post('/forgot-password',)
 app.use('/api', router);
 app.listen(4000);

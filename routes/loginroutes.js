@@ -26,6 +26,9 @@ connection.connect((err) => {
   }
 });
 exports.register = async (req, res) => {
+  if (req.body.email === '' || req.body.username === '' || req.body.password === '') {
+    res.status(400).send('Your cannot have invalid  value.');
+  }
   const { password } = req.body;
   const encryptedPassword = await bcrypt.hash(password, saltRounds).catch((e) => {
     throw e;
@@ -78,13 +81,14 @@ exports.login = async function (req, res, err) {
       const token = jwt.sign({ user }, 'yourSecretKey', {
         expiresIn: '24h',
       });
-      user.update({
-        state: 'Active',
-      });
+      // user.update({
+      //   state: 'Active',
+      // });
       res.json({
         id: user.id,
         token,
         message: 'Login successfull.',
+        state: user.state,
       });
     } else {
       res.status(404).send('Password is not incorrect.');
@@ -180,7 +184,6 @@ exports.reset = async function (req, res) {
   if (user == null) {
     res.status(400).json('password reset link is invalid or has expired');
   } else if (user != null) {
-    console.log('user exists in db');
     bcrypt
       .hash(req.body.password, saltRounds)
       .then((hashedPassword) => {
@@ -191,14 +194,13 @@ exports.reset = async function (req, res) {
         });
       })
       .then(() => {
-        console.log('Password updated');
         res.status(200).json('password updated');
       });
   } else {
-    console.error('no user exists in db to update');
     res.status(401).json('no user exists in db to update');
   }
 };
+// eslint-disable-next-line func-names
 exports.update = async function (req, res) {
   const user = await User.findOne({
     where: { email: req.body.email },
@@ -220,6 +222,50 @@ exports.update = async function (req, res) {
     res.status(401).json('no user exists in db to update');
   }
 };
-// exports.update1 = async (req, res) => {
+exports.update1 = async (req, res) => {
+  const user = await User.findOne({
+    where: { id: req.params.id },
+  });
+  if (user == null) {
+    res.status(400).json('Not in database.');
+  } else {
+    const findEmail = await User.findOne({
+      where: { email: req.body.email },
+    });
+    if (findEmail !== null && user.email !== req.body.email) {
+      res.status(400).json('Email update have exists in database.');
+    } else {
+      user.update({
+        username: req.body.username,
+        email: req.body.email,
+      });
+      res.status(200).json({
+        user,
+        message: 'Successfull.',
+      });
+    }
+  }
+};
 
-// };
+exports.updateState = async (req, res) => {
+  const user = await User.findOne({
+    where: {
+      id: req.params.id,
+    },
+  });
+  if (user === null) {
+    res.status(400).send('User not in database.');
+  } else {
+    // eslint-disable-next-line no-unused-expressions
+    req.body.state === 'Active' ? user.update({
+      state: 'Deactive',
+    }) : user.update({
+      state: 'Active',
+    });
+
+    res.status(200).json({
+      user,
+      message: 'Ok',
+    });
+  }
+};

@@ -1,4 +1,4 @@
-module.exports = (sequelize, type) => sequelize.define('user', {
+module.exports = (sequelize, type) => sequelize.define('123123123', {
   id: {
     type: type.INTEGER,
     primaryKey: true,
